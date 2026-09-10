@@ -43,3 +43,64 @@ Executed a stager passed as an encoded Unicode string designed to bypass static 
 
 ```powershell
 powershell.exe -NoProfile -WindowStyle Hidden -EncodedCommand VwByAGkAdABlAC0ASABvAHMAdAAgACIAWwAhAF0AIABNAGEAbABpAGMAaQBvAHUAcwAgAFAAYQB5AGwAbwBhAGQAIABFAHgAZQBjAHUAdABlAGQAIgA=
+Telemetry Analysis & Decoded Artifact
+While standard command-line logging registers only the Base64 string, Event ID 4104 intercepts the script block after the engine parses it:
+Event ID: 4104
+Channel: Microsoft-Windows-PowerShell/Operational
+Level: Verbose
+Creating Scriptblock text (1 of 1):
+Write-Host "[!] Malicious Payload Executed"
+Simulation 2: In-Memory Remote Web Cradle
+Threat Scenario
+Threat actors avoid writing files to the file system by staging code directly in memory. Using the .NET System.Net.WebClient class paired with Invoke-Expression (IEX), remote payloads execute dynamically inside the running process.
+
+Attack Execution
+$wc = New-Object System.Net.WebClient; $payload = "Write-Host '[!] Web Cradle Download Executed Successfully' -ForegroundColor Red"; Invoke-Expression $payload
+Telemetry Analysis & Artifact Extraction
+Script Block Logging records both the cradle initialization and the dynamic script executed by Invoke-Expression:
+Event ID: 4104
+Channel: Microsoft-Windows-PowerShell/Operational
+Level: Verbose
+Creating Scriptblock text (1 of 1):
+$wc = New-Object System.Net.WebClient; $payload = "Write-Host '[!] Web Cradle Download Executed Successfully' -ForegroundColor Red"; Invoke-Expression $payload
+Programmatic Threat Hunting
+Rather than manually searching through operational events in the Event Viewer GUI, analysts use automated queries to extract suspicious patterns at scale.
+
+Hunt Query Implementation
+Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-PowerShell/Operational'; Id=4104} -MaxEvents 100 | 
+Where-Object { 
+    $_.Message -match 'Malicious Payload Executed' -or 
+    $_.Message -match 'WebClient' 
+} | 
+Select-Object -First 1 | 
+Format-List TimeCreated, Id, @{Name='MatchedScriptBlock'; Expression={($_.Message -split "`r?`n")[0..3] -join "`n"}}
+Detection Engineering: Sigma Rule
+To standardize detection across SIEM environments, I developed a vendor-agnostic Sigma rule targeting the indicators observed during both simulations.
+title: Suspicious PowerShell Staging and Web Cradle Execution
+id: 9a2f7411-89bc-4321-9def-0123456789ab
+status: experimental
+description: Identifies suspicious script blocks indicative of Base64 obfuscation or remote cradle activity.
+author: Anjolaoluwa Toriola
+logsource:
+    product: windows
+    service: powershell-operational
+detection:
+    selection:
+        EventID: 4104
+        ScriptBlockText|contains:
+            - 'Net.WebClient'
+            - 'DownloadString'
+            - 'Invoke-Expression'
+            - '-EncodedCommand'
+            - 'FromBase64String'
+    condition: selection
+falsepositives:
+    - Administrative automation scripts
+    - Deployment orchestration frameworks (SCCM, Chocolatey)
+level: high
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.defense_evasion
+    - attack.t1027
+    
