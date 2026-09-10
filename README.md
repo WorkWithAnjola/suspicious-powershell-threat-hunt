@@ -29,7 +29,7 @@ This project focuses on establishing host-based telemetry, simulating real-world
 To achieve complete visibility, script block logging was enabled along with invocation start/stop tracking via Local Group Policy.
 
 <p align="center">
-  <img src="01_gpo_scriptblock_logging.png" alt="Script Block Logging GPO Configuration" width="700"/>
+  <img src="[01_gpo_scriptblock_logging.png](https://github.com/WorkWithAnjola/suspicious-powershell-threat-hunt/blob/main/03_powershell_hunt_terminal.png.png)" alt="Script Block Logging GPO Configuration" width="700"/>
 </p>
 <p align="center"><em>Figure 1: Local Group Policy configuration enabling Script Block Logging and invocation tracking.</em></p>
 
