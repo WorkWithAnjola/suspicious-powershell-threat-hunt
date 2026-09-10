@@ -55,9 +55,9 @@ powershell.exe -NoProfile -WindowStyle Hidden -EncodedCommand VwByAGkAdABlAC0ASA
 While standard command-line logging registers only the Base64 string, Event ID 4104 intercepts the script block after the engine parses it:
 
 ```
-Event ID: 4104
+[Event ID: 4104
 Channel: Microsoft-Windows-PowerShell/Operational
-Level: Verbose
+Level: Verbose](https://github.com/WorkWithAnjola/suspicious-powershell-threat-hunt/blob/main/02_event_4104_decoded_payload.png.png)
 
 Creating Scriptblock text (1 of 1):
 Write-Host "[!] Malicious Payload Executed"
