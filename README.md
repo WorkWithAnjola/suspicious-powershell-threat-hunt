@@ -29,7 +29,7 @@ This project focuses on establishing host-based telemetry, simulating real-world
 To achieve complete visibility, script block logging was enabled along with invocation start/stop tracking via Local Group Policy.
 
 <p align="center">
-  <img src="[01_gpo_scriptblock_logging.png](https://github.com/WorkWithAnjola/suspicious-powershell-threat-hunt/blob/main/03_powershell_hunt_terminal.png.png)" alt="Script Block Logging GPO Configuration" width="700"/>
+  <img src="01_gpo_scriptblock_logging.png" alt="Script Block Logging GPO Configuration" width="700"/>
 </p>
 <p align="center"><em>Figure 1: Local Group Policy configuration enabling Script Block Logging and invocation tracking.</em></p>
 
@@ -55,13 +55,18 @@ powershell.exe -NoProfile -WindowStyle Hidden -EncodedCommand VwByAGkAdABlAC0ASA
 While standard command-line logging registers only the Base64 string, Event ID 4104 intercepts the script block after the engine parses it:
 
 ```
-[Event ID: 4104
+Event ID: 4104
 Channel: Microsoft-Windows-PowerShell/Operational
-Level: Verbose](https://github.com/WorkWithAnjola/suspicious-powershell-threat-hunt/blob/main/02_event_4104_decoded_payload.png.png)
+Level: Verbose
 
 Creating Scriptblock text (1 of 1):
 Write-Host "[!] Malicious Payload Executed"
 ```
+
+<p align="center">
+  <img src="02_event_4104_decoded_payload.png" alt="Decoded Event ID 4104 Script Block" width="700"/>
+</p>
+<p align="center"><em>Figure 2: Event ID 4104 in Event Viewer showing the decoded script block after Base64 deobfuscation.</em></p>
 
 ### Simulation 2 — In-Memory Remote Web Cradle
 
@@ -107,6 +112,11 @@ Where-Object {
 Select-Object -First 1 |
 Format-List TimeCreated, Id, @{Name='MatchedScriptBlock'; Expression={($_.Message -split "`r?`n")[0..3] -join "`n"}}
 ```
+
+<p align="center">
+  <img src="03_powershell_hunt_terminal.png" alt="PowerShell Hunt Query Terminal Output" width="700"/>
+</p>
+<p align="center"><em>Figure 3: Terminal output of the automated hunt query surfacing the matched script block.</em></p>
 
 ---
 
