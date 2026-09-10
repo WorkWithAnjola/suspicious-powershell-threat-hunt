@@ -103,4 +103,15 @@ tags:
     - attack.t1059.001
     - attack.defense_evasion
     - attack.t1027
-    
+    Strategic Recommendations & Defensive Hardening
+To protect public sector infrastructure and enterprise environments from living-off-the-land techniques, security programs must move beyond reactive alerting to layered prevention and policy governance.
+What to Implement (Solutions)
+* Enforce Constrained Language Mode (CLM): Configure PowerShell via AppLocker or Device Guard to operate strictly in Constrained Language Mode for standard endpoints. This restricts dynamic script block execution and neutralizes unauthorized .NET methods such as System.Net.WebClient or API reflection calls.
+* Centralize Script Block Telemetry (SIEM Forwarding): Ingest Windows Event ID 4104 into a centralized security data lake or SIEM. Correlate rapid bursts of 4104 events with external network requests and child process spawning under powershell.exe to catch multi-stage intrusions early.
+* Map Security Controls to Governance Frameworks: Align monitoring controls with NIST SP 800-53(specifically AU-2 Audit Events and SI-4 Information System Monitoring) and CIS Critical Security Controls (Control 8: Audit Log Management) to maintain audit-ready regulatory compliance across government networks.
+* Mandate Digital Signatures for Admin Workflows: Deploy an execution policy that only permits cryptographically verified, internally signed scripts to run (AllSigned), preventing users from executing unsanctioned scripts pulled from internet repositories.
+What to Avoid (Pitfalls to Prevent)
+* Do Not Rely Solely on Command Line Logging: Security Event ID 4688 or basic Sysmon Event 1 only sees raw inputs. If an adversary passes a base64 encoded string or executes entirely within an interactive console, command line auditing is blinded. Script Block Logging (Event ID 4104) is required to see decoded runtime code.
+* Do Not Treat Execution Policies as Security Boundaries: Setting Set-ExecutionPolicy Restricted is an operational safety net to stop accidental clicks, not an adversarial boundary. Attackers routinely bypass execution policies using arguments like -ExecutionPolicy Bypass or inline web cradles without triggering alerts.
+* Avoid Flat, Unmonitored PowerShell Permissions: Never grant domain-wide local administrator rights that permit arbitrary remote PowerShell sessions (WinRM / Enter-PSSession) without baseline tracking, credential hygiene, and just-in-time administrative access controls.
+
